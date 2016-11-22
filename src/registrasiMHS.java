@@ -5,7 +5,16 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.PrintJob;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.FileInputStream;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -14,6 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -194,6 +204,10 @@ public class registrasiMHS extends JFrame{
 		browse.setIcon(new ImageIcon(""));//nntik
 		browse.setToolTipText("Pilih Foto Anda");
 		
+		panel2.add(exit);
+		exit.setBounds(15, 340, 120, 55);
+		exit.setToolTipText("Kelaur");
+		exit.setIcon(new ImageIcon(""));//nntik
 		/*PANEL 3*/
 		
 		getContentPane().add(panel3);
@@ -228,7 +242,209 @@ public class registrasiMHS extends JFrame{
 		
 	}
 	void aksiReaksi(){
+		/*PRINT */
+		print.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent w) {
+				cetakHasil();
+				
+			}
+		});
 		
+		/*CARI GAMBAR*/
+		browse.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int buka= fc.showOpenDialog(lfoto2);
+				if(buka ==JFileChooser.APPROVE_OPTION){
+					String sumber=fc.getSelectedFile().getPath();
+					lfoto2.setIcon(new ImageIcon(sumber));
+					File file = new File(sumber);
+					try {
+						FileInputStream fis = new FileInputStream(sumber);
+					} catch (Exception e2) {
+						Logger.getLogger(registrasiMHS.class.getName()).log(Level.SEVERE, null, e2);
+					}
+					
+				}
+				
+			}
+		});
+		
+		/*SAVE*/
+		save.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String sumber = fc.getSelectedFile().getPath();
+				try {
+					File filegambar= new File(sumber);
+					FileInputStream fis= new FileInputStream(filegambar);
+					Class.forName("com.mysql.jdbc.Driver").newInstance();
+					Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/politeknikaceh","root","");
+					String sql= "insert into datamahasiswa values(?,?,?,?,?,?,?,?,?)";
+					PreparedStatement pr=connection.prepareStatement(sql);
+					pr.setString(1, txnim.getText());
+					pr.setString(2, txnama.getText());
+					pr.setString(3, pria.getText());
+					pr.setString(3, wanita.getText());
+					pr.setString(4, (String) cbJur.getSelectedItem());
+					pr.setString(5, (String) cbKelas.getSelectedItem());
+					pr.setString(6, txTahun.getText());
+					pr.setString(7, txHp.getText());
+					pr.setString(8, txEmail.getText());
+					pr.setBinaryStream(9, fis,(int)filegambar.length());
+					pr.executeUpdate();
+					JOptionPane.showMessageDialog(null, "Data Berhasil DIsimpan","Pesan",JOptionPane.INFORMATION_MESSAGE);
+					tampilTabel();
+					bersihData();
+				} catch (Exception e2) {
+					JOptionPane.showMessageDialog(null, "Data Gagal Disimpan","Pesan",JOptionPane.INFORMATION_MESSAGE);
+					System.out.println(e2);
+				}
+				
+			}
+		});
+		/*CETAK*/
+		cetak.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int y=0;
+				Frame fr =new Frame();
+				PrintJob print = fr.getToolkit().getPrintJob(fr, "Printing", null,null);
+				if(print!=null){
+					Graphics g = print.getGraphics();
+					if(g!=null){
+						g.setFont(new Font("Dialog", 1, 11));
+						g.drawString("KARTU REGISTRASI MAHASISWA", 10, 40);
+						g.drawLine(10, 50, 550, 50);
+						g.drawString("NIM", 10, 70);
+						g.drawString(":", 90, 70);
+						g.drawString(txnim.getText(), 100, 70);
+						g.drawString("Nama", 10, 90);
+						g.drawString(":", 90, 90);
+						g.drawString(txnama.getText(), 100, 90);
+						
+						g.drawString("Gender", 10, 110);
+						g.drawString(":", 90, 110);
+						if(pria.isSelected()==true){
+							g.drawString(pria.getText(), 100, 110);
+						}else{
+							g.drawString(wanita.getText(), 100, 110);
+						}
+						g.drawString("Jurusan", 10, 130);
+						g.drawString(":", 90, 130);
+						g.drawString((String)cbJur.getSelectedItem(), 100, 150);
+						
+						g.drawString("Kelas", 10, 150);
+						g.drawString(":", 90, 150);
+						g.drawString((String)cbKelas.getSelectedItem(), 100, 150);
+						
+						g.drawString("Tahun Ajaran", 10, 170);
+						g.drawString(":", 90, 170);
+						g.drawString(txTahun.getText(), 10, 170);
+						
+						g.drawString("Hp", 10, 190);
+						g.drawString(":", 90, 190);
+						g.drawString(txHp.getText(), 100, 190);
+						
+						g.drawString("Email", 10, 210);
+						g.drawString(":", 90, 210);
+						g.drawString(txEmail.getText(), 100, 210);
+						
+					}
+				}
+				print.end();
+				print.end();
+			}
+		});
+		/*CARI*/
+		cari.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int vblob;
+				ImageIcon gambar;
+				String nim = txnim.getText();
+				try {
+					Class.forName("com.mysql.jdbc.Driver").newInstance();
+					Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/politeknikAceh","root","");
+					Statement statement= connection.createStatement();
+					String sql = "select * from datamahasiswa where nim='"+nim+"'";
+					ResultSet rs=statement.executeQuery(sql);
+					if(rs.next()){
+						txnama.setText(rs.getString(2));
+						String gender=rs.getString(3);
+						if(gender.equals("Pria")){
+							pria.setSelected(true);
+						}else if (gender.equals("Wanita")){
+							wanita.setSelected(true);
+						}
+						cbJur.setSelectedItem(rs.getString(4));
+						cbKelas.setSelectedItem(rs.getString(5));
+						txTahun.setText(rs.getString(6));
+						txHp.setText(rs.getString(7));
+						txEmail.setText(rs.getString(8));
+						blob= rs.getBlob(9);
+						vblob=(int) blob.length();
+						gambar=new ImageIcon(blob.getBytes(1, vblob));
+						lfoto2.setIcon(gambar);
+					}
+							
+				} catch (Exception e2) {
+					System.out.println(e2);
+				}
+			}
+			
+		});
+		/*UPDATE*/
+		upadte.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==upadte){
+					try {
+						String sumber = fc.getSelectedFile().getPath();
+						File filegambar = new File(sumber);
+						FileInputStream fis = new FileInputStream(filegambar);
+						Class.forName("com.mysql.jdbc.Driver");
+						Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/politeknikaceh","root","");
+						String sql= "update datamahasiswa set nama=?,gender=?,jurusan=?,kelas=?,ajaran=?,hp=?,email=?,photo=? where nim=?";
+						PreparedStatement pr = connection.prepareStatement(sql);
+						pr.setString(1, txnama.getText());
+						pr.setString(2, pria.getText());
+						pr.setString(2, wanita.getText());
+						pr.setString(3, (String) cbJur.getSelectedItem());
+						pr.setString(4, (String) cbKelas.getSelectedItem());
+						pr.setString(5, txTahun.getText());
+						pr.setString(6, txHp.getText());
+						pr.setString(7, txEmail.getText());
+						pr.setBinaryStream(8, fis,(int)filegambar.length());
+						pr.setString(9, txnim.getText());
+						pr.executeUpdate();
+						pr.close();
+						connection.close();
+						tampilTabel();
+						bersihData();
+						JOptionPane.showMessageDialog(null, "Data Sudah Terupdate","Konfirmasi",JOptionPane.INFORMATION_MESSAGE);
+					} catch (Exception e2) {
+						System.out.println(e2);
+					}
+				}
+			}
+		});
+		/*EXIT*/
+		exit.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+				
+			}
+		});
 	}
 	
 	void bersihData(){
@@ -247,7 +463,7 @@ public class registrasiMHS extends JFrame{
 	void tampilTabel(){
 		hapusTabel();
 		try {
-			Class.forName("com.mysqljdbc.Driver");
+			Class.forName("com.mysql.jdbc.Driver");
 			Connection connection= DriverManager.getConnection("jdbc:mysql://localhost/politeknikaceh","root","");
 			Statement state = connection.createStatement();
 			String sql= "select * from datamahasiswa";
@@ -286,8 +502,54 @@ public class registrasiMHS extends JFrame{
 				g.drawString("085358484618", 180, 60);
 				
 				//untukk NAMA KOLOM TABEL
+				String nim = tabel.getColumnName(0);
+				String nama=tabel.getColumnName(1);
+				String gender= tabel.getColumnName(2);
+				String jurusan=tabel.getColumnName(3);
+				String kelas= tabel.getColumnName(4);
+				String tahunAjaran=tabel.getColumnName(5);
+				String hp=tabel.getColumnName(6);
+				String email=tabel.getColumnName(7);
+				g.setFont(new Font("Dialog", 1, 8));
+				g.drawString(nim, 30, 100);
+				g.drawString(nama, 80, 100);
+				g.drawString(gender, 130, 100);
+				g.drawString(jurusan, 150, 100);
+				g.drawString(tahunAjaran, 300, 100);
+				g.drawString(hp, 350, 100);
+				g.drawString(email, 400, 100);
+				g.drawLine(30, 103, 550, 103);
+				
+				//untuk data tabel
+				int n = model.getRowCount();
+				for (int i = 0; i < n; i++) {
+					int k =i+1;
+					int j=10*k;
+					y = 100+7;
+					g.setFont(new Font("Dialog", 0, 8));
+					String dataNim= model.getValueAt(i, 0).toString();
+					String dataNama=model.getValueAt(i, 1).toString();
+					String dataGender= model.getValueAt(i, 2).toString();
+					String dataJurusan = model.getValueAt(i, 3).toString();
+					String dataKelas=model.getValueAt(i, 4).toString();
+					String dataTahun= model.getValueAt(i, 5).toString();
+					String dataHp= model.getValueAt(i, 6).toString();
+					String dataEmail=model.getValueAt(i, 7).toString();
+					
+					g.drawString(dataNim, 300, y);
+					g.drawString(dataNama, 100, y);
+					g.drawString(dataGender, 150, y);
+					g.drawString(dataJurusan, 200, y);
+					g.drawString(dataKelas, 250, y);
+					g.drawString(dataTahun, 300, y);
+					g.drawString(dataHp, 350, y);
+					g.drawString(dataEmail, 400, y);
+				}
+				
 				//BERHENTI
 			}
+			printerJob.end();
+			printerJob.end();
 		}
 	}
 	
