@@ -65,9 +65,9 @@ public class registrasiMHS extends JFrame{
 	JLabel  lfoto3=new JLabel(new ImageIcon(""));
 	JFileChooser fc = new JFileChooser();
 	Blob blob;
-	JLabel logo = new JLabel(new ImageIcon());//nntik
-	JLabel  gambar= new JLabel(new ImageIcon());//nntik
-	JLabel cari = new JLabel(new ImageIcon());//nntik
+	JLabel logo = new JLabel(new ImageIcon("img/logopoltek.png"));//nntik
+	JLabel  gambar= new JLabel(new ImageIcon("img/bg.jpg"));//nntik
+	JLabel cari = new JLabel(new ImageIcon("img/search.png"));
 	String header[]= {"NIM","NAMA", "Gender", "Jurusan", "Kelas", "Tahun Ajaran", "HP", "Email"};
 	DefaultTableModel model = new DefaultTableModel(null, header);
 	JTable  tabel = new JTable(model);
@@ -181,33 +181,33 @@ public class registrasiMHS extends JFrame{
 		
 		panel2.add(save);
 		save.setBounds(15, 20, 120, 60);
-		save.setIcon(new ImageIcon(""));//nntik
+		save.setIcon(new ImageIcon("img/save.png"));//nntik
 		save.setToolTipText("SAVE");
 		
 		panel2.add(upadte);
 		upadte.setBounds(15, 85, 120, 60);
 		upadte.setToolTipText("UPDATE");
-		upadte.setIcon(new ImageIcon(""));//nntik
+		upadte.setIcon(new ImageIcon("img/edit.png"));//nntik
 		
 		panel2.add(cetak);
 		cetak.setBounds(15, 150, 120, 60);
 		cetak.setToolTipText("CLEAR");
-		cetak.setIcon(new ImageIcon(""));//nntik
+		cetak.setIcon(new ImageIcon("img/print.png"));//nntik
 		
 		panel2.add(delete);
 		delete.setBounds(15, 215, 120, 60);
 		delete.setToolTipText("DELETE");
-		delete.setIcon(new ImageIcon(""));//nntik
+		delete.setIcon(new ImageIcon("img/remove.png"));//nntik
 		
 		panel2.add(browse);
 		browse.setBounds(15, 280, 120, 55);
-		browse.setIcon(new ImageIcon(""));//nntik
+		browse.setIcon(new ImageIcon("img/folder-open.png"));//nntik
 		browse.setToolTipText("Pilih Foto Anda");
 		
 		panel2.add(exit);
 		exit.setBounds(15, 340, 120, 55);
 		exit.setToolTipText("Kelaur");
-		exit.setIcon(new ImageIcon(""));//nntik
+		exit.setIcon(new ImageIcon("img/power-off.png"));//nntik
 		/*PANEL 3*/
 		
 		getContentPane().add(panel3);
@@ -228,7 +228,7 @@ public class registrasiMHS extends JFrame{
 		
 		panel3.add(print);
 		print.setBounds(10, 350, 530, 50);
-		print.setIcon(new ImageIcon(""));//nntik
+		print.setIcon(new ImageIcon("img/print.png"));//nntik
 		/*END PANEL 3*/
 		
 		getContentPane().add(logo);
@@ -288,8 +288,11 @@ public class registrasiMHS extends JFrame{
 					PreparedStatement pr=connection.prepareStatement(sql);
 					pr.setString(1, txnim.getText());
 					pr.setString(2, txnama.getText());
-					pr.setString(3, pria.getText());
-					pr.setString(3, wanita.getText());
+					if(pria.isSelected()){
+						pr.setString(3, pria.getText());
+					}else if(wanita.isSelected()){
+						pr.setString(3, wanita.getText());
+					}
 					pr.setString(4, (String) cbJur.getSelectedItem());
 					pr.setString(5, (String) cbKelas.getSelectedItem());
 					pr.setString(6, txTahun.getText());
@@ -319,8 +322,8 @@ public class registrasiMHS extends JFrame{
 					Graphics g = print.getGraphics();
 					if(g!=null){
 						g.setFont(new Font("Dialog", 1, 11));
-						g.drawString("KARTU REGISTRASI MAHASISWA", 10, 40);
-						g.drawLine(10, 50, 550, 50);
+						g.drawString("KARTU REGISTRASI MAHASISWA", 200, 40);
+						g.drawLine(10, 50, 600, 50);
 						g.drawString("NIM", 10, 70);
 						g.drawString(":", 90, 70);
 						g.drawString(txnim.getText(), 100, 70);
@@ -330,14 +333,14 @@ public class registrasiMHS extends JFrame{
 						
 						g.drawString("Gender", 10, 110);
 						g.drawString(":", 90, 110);
-						if(pria.isSelected()==true){
+						if(pria.isSelected()){
 							g.drawString(pria.getText(), 100, 110);
-						}else{
+						}else if (wanita.isSelected()){
 							g.drawString(wanita.getText(), 100, 110);
 						}
 						g.drawString("Jurusan", 10, 130);
 						g.drawString(":", 90, 130);
-						g.drawString((String)cbJur.getSelectedItem(), 100, 150);
+						g.drawString((String)cbJur.getSelectedItem(), 100, 130);
 						
 						g.drawString("Kelas", 10, 150);
 						g.drawString(":", 90, 150);
@@ -345,7 +348,7 @@ public class registrasiMHS extends JFrame{
 						
 						g.drawString("Tahun Ajaran", 10, 170);
 						g.drawString(":", 90, 170);
-						g.drawString(txTahun.getText(), 10, 170);
+						g.drawString(txTahun.getText(), 100, 170);
 						
 						g.drawString("Hp", 10, 190);
 						g.drawString(":", 90, 190);
@@ -415,8 +418,11 @@ public class registrasiMHS extends JFrame{
 						String sql= "update datamahasiswa set nama=?,gender=?,jurusan=?,kelas=?,ajaran=?,hp=?,email=?,photo=? where nim=?";
 						PreparedStatement pr = connection.prepareStatement(sql);
 						pr.setString(1, txnama.getText());
-						pr.setString(2, pria.getText());
-						pr.setString(2, wanita.getText());
+						if(pria.isSelected()){
+							pr.setString(2, pria.getText());
+						}else if(wanita.isSelected()){
+							pr.setString(2, wanita.getText());
+						}
 						pr.setString(3, (String) cbJur.getSelectedItem());
 						pr.setString(4, (String) cbKelas.getSelectedItem());
 						pr.setString(5, txTahun.getText());
@@ -436,6 +442,32 @@ public class registrasiMHS extends JFrame{
 				}
 			}
 		});
+		/*DELETE*/
+		delete.addActionListener(new ActionListener(){
+			public void actionPerformed (ActionEvent e){
+				String nim=txnim.getText();
+				int tanya = JOptionPane.showConfirmDialog(null,"Apakah Anda ingin Menghapus Data NIM "+nim+"?","Konfirmasi",JOptionPane.YES_NO_OPTION);
+				{
+					try{
+						Class.forName("com.mysql.jdbc.Driver");
+						Connection koneksi = DriverManager.getConnection("jdbc:mysql://localhost/politeknikaceh",
+						"root", "");
+						String sql="DELETE FROM datamahasiswa WHERE nim=?";
+						PreparedStatement pr = koneksi.prepareStatement(sql);
+						pr.setString(1,nim);
+						pr.executeUpdate();
+						pr.close();
+						koneksi.close();
+						JOptionPane.showMessageDialog(null,"Data telah dihapus");
+						tampilTabel(); //ambil data di void tampilTabel()
+						bersihData();
+						}
+					catch (Exception ex){
+						JOptionPane.showMessageDialog(null,"Error :"+ex,"Error",JOptionPane.ERROR_MESSAGE);
+						}
+				} 
+				}
+			} );
 		/*EXIT*/
 		exit.addActionListener(new ActionListener() {
 			
@@ -495,11 +527,11 @@ public class registrasiMHS extends JFrame{
 			if(g != null){
 				Image image = new ImageIcon("Gambar/logo.png").getImage();
 				g.setFont(new Font("Dialog", 1, 11));
-				g.drawString("Sistem Registrasi Mahasiswa", 150, 40);
+				g.drawString("Sistem Registrasi Mahasiswa", 200, 40);
 				g.setFont(new Font("Dialog", 1, 10));
-				g.drawString("Jl. Poloteknik Aceh", 170, 50);
+				g.drawString("Jl. Poloteknik Aceh No 1", 220, 50);
 				g.setFont(new Font("Dialog", 1, 9));
-				g.drawString("085358484618", 180, 60);
+				g.drawString("085358484618", 245, 60);
 				
 				//untukk NAMA KOLOM TABEL
 				String nim = tabel.getColumnName(0);
@@ -513,11 +545,12 @@ public class registrasiMHS extends JFrame{
 				g.setFont(new Font("Dialog", 1, 8));
 				g.drawString(nim, 30, 100);
 				g.drawString(nama, 80, 100);
-				g.drawString(gender, 130, 100);
-				g.drawString(jurusan, 150, 100);
+				g.drawString(gender, 150, 100);
+				g.drawString(jurusan, 190, 100);
+				g.drawString(kelas, 270, 100);
 				g.drawString(tahunAjaran, 300, 100);
-				g.drawString(hp, 350, 100);
-				g.drawString(email, 400, 100);
+				g.drawString(hp, 360, 100);
+				g.drawString(email, 420, 100);
 				g.drawLine(30, 103, 550, 103);
 				
 				//untuk data tabel
@@ -525,7 +558,7 @@ public class registrasiMHS extends JFrame{
 				for (int i = 0; i < n; i++) {
 					int k =i+1;
 					int j=10*k;
-					y = 100+7;
+					y = 100+j;
 					g.setFont(new Font("Dialog", 0, 8));
 					String dataNim= model.getValueAt(i, 0).toString();
 					String dataNama=model.getValueAt(i, 1).toString();
@@ -536,14 +569,14 @@ public class registrasiMHS extends JFrame{
 					String dataHp= model.getValueAt(i, 6).toString();
 					String dataEmail=model.getValueAt(i, 7).toString();
 					
-					g.drawString(dataNim, 300, y);
-					g.drawString(dataNama, 100, y);
+					g.drawString(dataNim, 30, y);
+					g.drawString(dataNama, 80, y);
 					g.drawString(dataGender, 150, y);
-					g.drawString(dataJurusan, 200, y);
-					g.drawString(dataKelas, 250, y);
+					g.drawString(dataJurusan, 190, y);
+					g.drawString(dataKelas, 270, y);
 					g.drawString(dataTahun, 300, y);
-					g.drawString(dataHp, 350, y);
-					g.drawString(dataEmail, 400, y);
+					g.drawString(dataHp, 360, y);
+					g.drawString(dataEmail, 420, y);
 				}
 				
 				//BERHENTI
